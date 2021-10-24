@@ -144,7 +144,10 @@ public class ChessMatch
 	
 	private Piece makeMove( Position source, Position target )
 	{
-		Piece piece = board.removePiece( source );
+		ChessPiece piece = (ChessPiece) board.removePiece( source );
+
+		piece.increaseMoveCount();
+
 		Piece capturedPiece = board.removePiece( target );
 		
 		board.placePiece( piece, target );
@@ -160,7 +163,9 @@ public class ChessMatch
 
 	private void undoMove( Position source, Position target, Piece capturedPiece )
 	{
-		Piece p = board.removePiece( target );
+		ChessPiece p = (ChessPiece) board.removePiece( target );
+
+		p.decreaseMoveCount();
 
 		board.placePiece( p, source );
 
@@ -216,11 +221,9 @@ public class ChessMatch
 
 	private boolean testCheckMate( Color color )
 	{
-		boolean isInCheckMate = false;
-
 		if ( ! testCheck( color ) )
 		{
-			isInCheckMate = false;
+			return false;
 		}
 
 		List<Piece> pieces = piecesOnTheBoard.stream().filter( x -> ( (ChessPiece) x ).getColor() == color ).collect( Collectors.toList() );
@@ -246,19 +249,14 @@ public class ChessMatch
 
 						if ( ! testCheck )
 						{
-							isInCheckMate = false;
-						}
-
-						else
-						{
-							isInCheckMate = true;
+							return false;
 						}
 					}
 				}
 			}
 		}
 
-		return isInCheckMate;
+		return true;
 	}
 	
 	private void placeNewPiece( char column, int row, ChessPiece piece )

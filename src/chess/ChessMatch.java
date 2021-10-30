@@ -161,17 +161,41 @@ public class ChessMatch
 			piecesOnTheBoard.remove( capturedPiece );
 			capturedPieces.add( capturedPiece );
 		}
-		
+
+		// special move - castliing kingside rook
+		if ( piece instanceof King && target.getColumn() == source.getColumn() + 2 )
+		{
+			Position rookSource = new Position( source.getRow(), source.getColumn() + 3 );
+			Position rookTarget = new Position( source.getRow(), source.getColumn() + 1 );
+
+			ChessPiece rook = (ChessPiece) board.removePiece( rookSource );
+			board.placePiece( rook , rookTarget );
+
+			rook.increaseMoveCount();
+		}
+
+		// special move - castliing queenside rook
+		if ( piece instanceof King && target.getColumn() == source.getColumn() - 2 )
+		{
+			Position rookSource = new Position( source.getRow(), source.getColumn() - 4 );
+			Position rookTarget = new Position( source.getRow(), source.getColumn() - 1 );
+
+			ChessPiece rook = (ChessPiece) board.removePiece( rookSource );
+			board.placePiece( rook , rookTarget );
+
+			rook.increaseMoveCount();
+		}
+
 		return capturedPiece;
 	}
 
 	private void undoMove( Position source, Position target, Piece capturedPiece )
 	{
-		ChessPiece p = (ChessPiece) board.removePiece( target );
+		ChessPiece piece = (ChessPiece) board.removePiece( target );
 
-		p.decreaseMoveCount();
+		piece.decreaseMoveCount();
 
-		board.placePiece( p, source );
+		board.placePiece( piece, source );
 
 		if ( capturedPiece != null )
 		{
@@ -179,6 +203,30 @@ public class ChessMatch
 
 			capturedPieces.remove( capturedPiece );
 			piecesOnTheBoard.add( capturedPiece );
+		}
+
+		// special move - castliing kingside rook
+		if ( piece instanceof King && target.getColumn() == source.getColumn() + 2 )
+		{
+			Position rookSource = new Position( source.getRow(), source.getColumn() + 3 );
+			Position rookTarget = new Position( source.getRow(), source.getColumn() + 1 );
+
+			ChessPiece rook = (ChessPiece) board.removePiece( rookTarget );
+			board.placePiece( rook , rookSource );
+
+			rook.decreaseMoveCount();
+		}
+
+		// special move - castliing queenside rook
+		if ( piece instanceof King && target.getColumn() == source.getColumn() - 2 )
+		{
+			Position rookSource = new Position( source.getRow(), source.getColumn() - 4 );
+			Position rookTarget = new Position( source.getRow(), source.getColumn() - 1 );
+
+			ChessPiece rook = (ChessPiece) board.removePiece( rookTarget );
+			board.placePiece( rook , rookSource );
+
+			rook.decreaseMoveCount();
 		}
 	}
 
@@ -283,7 +331,7 @@ public class ChessMatch
 
 		placeNewPiece( 'd', 1, new Queen( board, Color.WHITE ) );
 		
-        placeNewPiece( 'e', 1, new King( board, Color.WHITE ) );
+        placeNewPiece( 'e', 1, new King( board, Color.WHITE, this ) );
 
 		for ( char i = 'a'; i <= 'h'; i++ ) 
 		{
@@ -301,7 +349,7 @@ public class ChessMatch
 
 		placeNewPiece( 'd', 8, new Queen( board, Color.BLACK ) );
 
-        placeNewPiece( 'e', 8, new King( board, Color.BLACK ) );
+        placeNewPiece( 'e', 8, new King( board, Color.BLACK, this ) );
 
 		for ( char i = 'a'; i <= 'h'; i++ ) 
 		{
